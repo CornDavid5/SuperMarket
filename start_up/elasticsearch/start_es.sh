@@ -2,8 +2,8 @@
 docker network create --driver bridge --subnet 192.166.0.0/16 --gateway 192.166.0.1 net-es
 
 # set the vm memory
-echo "vm.max_map_count=262144" >> /etc/sysctl.conf
-sysctl -w vm.max_map_count=262144
+# echo "vm.max_map_count=262144" >> /etc/sysctl.conf # use this one for persistence config
+sudo sysctl -w vm.max_map_count=262144
 
 # start es nodes
 docker run -d --name es-1 --restart always --net net-es -p 9201:9200 -p 9301:9300 -e "discovery.zen.ping.unicast.hosts=es-2,es-3" zongxr/elasticsearch:6.8.6

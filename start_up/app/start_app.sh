@@ -1,3 +1,6 @@
+# get path
+start_up_path=$(git rev-parse --show-toplevel)/start_up
+
 # 启动rabbitmq
 docker run -d --name rabbitmq --restart always --net net-app -p 5672:5672 -p 15672:15672 rabbitmq:3.7.7
 docker exec rabbitmq /usr/lib/rabbitmq/bin/rabbitmq-plugins enable rabbitmq_management
@@ -28,7 +31,7 @@ docker network connect net-redis supermarket-user-1
 docker run -d --name supermarket-gateway-1 --restart always --net net-app -p 10001:10001 zongxr/supermarket-gateway:1.1.0.0
 
 # 启动图片微服务
-docker run -d --name supermarket-image-1 --restart always -v /opt/supermarketimg:/opt/supermarketimg --net net-app -p 10003:10003 zongxr/supermarket-image:1.1.0.0
+docker run -d --name supermarket-image-1 --restart always -v $start_up_path/supermarketimg:/opt/supermarketimg --net net-app -p 10003:10003 zongxr/supermarket-image:1.1.0.0
 docker network connect net-redis supermarket-image-1
 
 # 启动检索微服务
@@ -41,7 +44,4 @@ docker network connect net-mysql supermarket-instantbuy-1
 docker network connect net-redis supermarket-instantbuy-1
 
 # 启动 nginx
-cp ./nginx.conf /home/nginx
-cp ../supermarketimg /opt
-cp ../supermarketstatic /opt
-docker run -d --name nginx --restart always -v /home/nginx/nginx.conf:/etc/nginx/nginx.conf -v /opt:/opt --net net-app -p 80:80 nginx:1.19.1
+docker run -d --name nginx --restart always -v $start_up_path/app/nginx.conf:/etc/nginx/nginx.conf -v $start_up_path/supermarketimg:/opt/supermarketimg -v $start_up_path/supermarketstatic:/opt/supermarketstatic --net net-app -p 80:80 nginx:1.19.1
